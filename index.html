@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <script type="text/javascript" src="cordova.js"></script>
+      <script type="text/javascript" src="js/onsenui.min.js"></script>
+      <script type="text/javascript" src="js/chartbundle.js"></script>
+      <script type="text/javascript" src="js/chartjs-plugin-doughnutlabel.min.js"></script>
+      <script type="text/javascript" src="js/utils.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+      <link rel="stylesheet" href="css/onsenui.min.css">
+      <link rel="stylesheet" href="css/onsen-css-components.min.css">
+      <link rel="stylesheet" href="css/index.css">
+      <style media="screen">
+      #mypage .page__background {
+        background-image: url('img/mountain.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      #weatherpage .page__background {
+        background-image: url('img/mountain.jpg');
+        background-repeat: no-repeat;
+        background-size: 100% 55%;
+      }
+      </style>
+    </head>
+    <body>
+      <ons-splitter>
+        <ons-splitter-side id="menu" side="left" width="220px" collapse swipeable>
+          <ons-page>
+            <ons-list-title>Access</ons-list-title>
+            <ons-list>
+              <ons-list-item onclick="fn.load('home.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-home list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Home
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="fn.load('moisture.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-angle-right list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Soil Moisture
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="fn.load('soilTemp.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-angle-right list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Soil Temperature
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="fn.load('weather.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-angle-right list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Environment
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="fn.load('system.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-angle-right list-item__icon"></i>
+                </div>
+                <div class="center">
+                  System
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="fn.load('settings.html')" tappable>
+                <div class="left">
+                  <i class="fas fa-cog list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Settings
+                </div>
+              </ons-list-item>
+              <ons-list-item onclick="menu.close();" tappable>
+                <div class="left">
+                  <i class="fas fa-angle-left list-item__icon"></i>
+                </div>
+                <div class="center">
+                  Back
+                </div>
+              </ons-list-item>
+            </ons-list>
+          </ons-page>
+        </ons-splitter-side>
+        <ons-splitter-content>
+          <ons-navigator id="myNavigator" page="home.html"></ons-navigator>
+        </ons-splitter-content>
+      </ons-splitter>
+
+<template id="home.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div class="hero-text">
+      <img src="img/plant.png" alt="Vermicompost">
+      <h1 style="font-size:50px">Welcome</h1>
+      <ons-button onclick="fn.open()">Get Started</ons-button>
+    </div>
+  </ons-page>
+</template>
+
+<template id="moisture.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div style="height: 40%;">
+      <div style="text-align: center;">
+        <i style="font-size:25px; color: white;" class="fas fa-map-marker-alt"></i>
+        <span style="color: white; font-size: 25px;">Soil Moisture</span><br>
+      </div>
+      <div class="grid-container">
+        <div class="grid-item">
+          <span>Soil Moisture A</span><br>
+          <span style="font-size: 30px;" id="tempValueA">0°</span><br>
+          <span>Percent</span>
+        </div>
+        <div class="grid-item">
+          <span>Soil Moisture B</span><br>
+          <span style="font-size: 30px;" id="tempValueB">0°</span><br>
+          <span>Percent</span>
+        </div>
+        <div class="grid-item">
+          <span>Soil Moisture C</span><br>
+          <span style="font-size: 30px;" id="tempValueC">0°</span><br>
+          <span>Percent</span>
+        </div>
+        <div class="grid-item">
+          <span>Soil Moisture D</span><br>
+          <span style="font-size: 30px;" id="tempValueD">0°</span><br>
+          <span>Percent</span>
+        </div>
+      </div>
+    </div>
+    <ons-card style="border-radius: 8px;">
+      <div>
+        <canvas id="BarChart" width="300" height="250"></canvas>
+      </div>
+    </ons-card>
+    <script type="text/javascript">
+    myBarChart = new Chart(document.getElementById('BarChart').getContext('2d'), configBar);
+    ons.getScriptPage().onInit = function() {
+        this.onShow = function() {
+          updateBar();
+        };
+        this.onHide = function() {stopUpdate(myBar);
+        };
+      };
+    </script>
+  </ons-page>
+</template>
+
+<template id="soilTemp.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div style="height: 10%;">
+      <div style="text-align: center;">
+        <i style="font-size:25px; color: white;" class="fas fa-map-marker-alt"></i>
+        <span style="color: white; font-size: 25px;">Soil Temperature</span><br>
+      </div>
+    </div>
+    <ons-card style="border-radius: 8px;">
+      <div class="container">
+        <div class="chart-container">
+          <canvas id="myCanvasA" width="300" height="210"></canvas>
+        </div>
+      </div>
+    </ons-card>
+    </ons-card>
+    <ons-card style="border-radius: 8px;">
+      <div class="container">
+        <div class="chart-container">
+          <canvas id="myCanvasB" width="300" height="210"></canvas>
+        </div>
+      </div>
+    </ons-card>
+    <script type="text/javascript">
+    myChartA = new Chart(document.getElementById('myCanvasA').getContext('2d'), configA);
+    myChartB = new Chart(document.getElementById('myCanvasB').getContext('2d'), configB);
+    ons.getScriptPage().onInit = function() {
+        this.onShow = function() {myUpdateA();myUpdateB();};
+        this.onHide = function() {stopUpdate(myTempA); stopUpdate(myTempB);};
+      };
+    </script>
+  </ons-page>
+</template>
+
+<template id="weather.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div style="height: 35%;">
+      <div style="text-align: center;">
+        <i style="font-size:25px; color: white;" class="fas fa-map-marker-alt"></i>
+        <span style="color: white; font-size: 25px;">Iloilo City</span><br>
+        <span style="text-align: center; color: white; font-size: 18px;" id="mydate"></span>
+      </div>
+      <div class="grid-container">
+        <div class="grid-item">
+          <span style="font-size: 18px;">Temperature</span><br>
+          <span style="font-size: 55px;" id="tempValue">0°</span><br>
+          <span>Celcius</span>
+        </div>
+        <div class="grid-item">
+          <span style="font-size: 18px;">Humidity</span><br>
+          <span style="font-size: 55px;" id="humidValue">0</span><br>
+          <span>Percent</span>
+        </div>
+      </div>
+    </div>
+    <ons-card style="border-radius: 8px;">
+      <div>
+        <canvas id="myCanvasE" width="300" height="120"></canvas>
+      </div>
+    </ons-card>
+    <ons-card style="border-radius: 8px;">
+      <div>
+        <canvas id="myCanvasF" width="300" height="120"></canvas>
+      </div>
+    </ons-card>
+    <script type="text/javascript">
+    myChartE = new Chart(document.getElementById('myCanvasE').getContext('2d'), configE);
+    myChartF = new Chart(document.getElementById('myCanvasF').getContext('2d'), configF);
+    ons.getScriptPage().onInit = function() {
+        this.onShow = function() {myUpdateE(); myUpdateF();};
+        this.onHide = function() {stopMultiUpdate(myVarE,myVarF);};
+      };
+      (function(){
+        var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        Date.prototype.getMonthName = function() {
+          return months[ this.getMonth() ];
+        };
+        Date.prototype.getDayName = function() {
+          return days[ this.getDay() ];
+        };
+      })();
+      var now = new Date();
+      var month = now.getMonthName();
+      var day = now.getDate();
+      var week = now.getDayName();
+      document.getElementById('mydate').innerHTML = week + "," + " " + month + " " + day;
+    </script>
+  </ons-page>
+</template>
+
+<template id="system.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div style="height: 10%;">
+      <div style="text-align: center;">
+        <i style="font-size:25px; color: white;" class="fas fa-map-marker-alt"></i>
+        <span style="color: white; font-size: 25px;">System Status</span><br>
+      </div>
+    </div>
+    <ons-card style="border-radius: 8px;">
+      <div class="container">
+        <div class="chart-container">
+          <canvas id="myCanvasC" width="300" height="210"></canvas>
+        </div>
+      </div>
+    </ons-card>
+    </ons-card>
+    <ons-card style="border-radius: 8px;">
+      <div class="container">
+        <div class="chart-container">
+          <canvas id="myCanvasD" width="300" height="210"></canvas>
+        </div>
+      </div>
+    </ons-card>
+    <script type="text/javascript">
+    myChartC = new Chart(document.getElementById('myCanvasC').getContext('2d'), configC);
+    myChartD = new Chart(document.getElementById('myCanvasD').getContext('2d'), configD);
+    ons.getScriptPage().onInit = function() {
+        this.onShow = function() {myUpdateC();myUpdateD();};
+        this.onHide = function() {stopUpdate(myTempC); stopUpdate(myTempD);};
+      };
+    </script>
+  </ons-page>
+</template>
+
+<!--
+<template id="system.html">
+  <ons-page id="mypage">
+    <ons-toolbar modifier="transparent cover-content">
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon style="color:white;" icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+    </ons-toolbar>
+    <div>
+      <div style="text-align: center;">
+        <i style="font-size:25px; color: white;" class="fas fa-map-marker-alt"></i>
+        <span style="color: white; font-size: 25px;">System</span><br>
+      </div>
+    </div>
+    <div class="bottom">
+    <ons-list>
+      <ons-list-item>
+        <div class="left">
+        </div>
+        <div class="center">
+          <span class="list-item__title">Water Level</span>
+          <span class="list-item__subtitle">Percent</span>
+          <span class="list-item__subtitle">0</span>
+        </div>
+        <div class="right">
+          <span id="waterLevel">0</span>
+        </div>
+      </ons-list-item>
+      <ons-list-item>
+        <div class="left">
+        </div>
+        <div class="center">
+          <span class="list-item__title">System Temperature</span>
+          <span class="list-item__subtitle">Celcius</span>
+        </div>
+      </ons-list-item>
+      <ons-list-item>
+        <div class="left">
+        </div>
+        <div class="center">
+          <span class="list-item__title">Fan Status</span>
+          <span class="list-item__subtitle">OFF</span>
+        </div>
+      </ons-list-item>
+      <ons-list-item>
+        <div class="left">
+        </div>
+        <div class="center">
+          <span class="list-item__title">Solenoid Valve</span>
+          <span class="list-item__subtitle">OFF</span>
+        </div>
+      </ons-list-item>
+    </ons-list>
+  </div>
+  <script type="text/javascript">
+    //myWaterLevel();
+  </script>
+  </ons-page>
+</template>-->
+
+<template id="settings.html">
+  <ons-page>
+    <ons-toolbar>
+      <div class="left">
+        <ons-toolbar-button onclick="fn.open()">
+          <ons-icon icon="md-menu"></ons-icon>
+        </ons-toolbar-button>
+      </div>
+      <div class="center">
+        Settings
+      </div>
+    </ons-toolbar>
+    <ons-list>
+      <ons-list-item onclick="app.initialize();" tappable>
+        <div class="left"></div>
+        <div class="center">
+          <span class="list-item__title">Bluetooth</span>
+          <span class="list-item__subtitle" id="statusDiv"></span>
+        </div>
+      </ons-list-item>
+      <ons-list-item>
+        <div class="left"></div>
+        <div class="center">
+          <span class="list-item__title">Help</span>
+        </div>
+      </ons-list-item>
+      <ons-list-item>
+        <div class="left"></div>
+        <div class="center">
+          <span class="list-item__title">About</span>
+        </div>
+      </ons-list-item>
+    </ons-list>
+    <script type="text/javascript">
+    document.getElementById('statusDiv').innerHTML = BluetoothStatus;
+    </script>
+    <!--
+    <button onclick="app.onDeviceReady();">TEST</button>
+      <h1>Bluetooth Counter</h1>
+      <div id="counter">...</div>
+      <div id="statusDiv"></div>-->
+  </ons-page>
+</template>
+
+    </body>
+</html>
